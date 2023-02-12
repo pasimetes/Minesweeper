@@ -1,12 +1,19 @@
 ﻿<Window
-    x:Class="Minesweeper.MainWindow"
+    x:Class="Minesweeper.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:Minesweeper.Converters"
+    xmlns:enums="clr-namespace:Minesweeper.Enums"
     x:Name="MainView"
     Title="Minesweeper"
     Width="700"
     Height="770"
     WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:TimespanStringConverter x:Key="TimespanStringConverter" />
+    </Window.Resources>
+
     <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="70" />
@@ -52,7 +59,7 @@
             VerticalAlignment="Center"
             Background="Transparent"
             BorderBrush="Transparent"
-            Click="NewGameOnClick"
+            Click="NewGame_OnClick"
             Cursor="Hand">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
@@ -65,10 +72,10 @@
                                             <Style TargetType="{x:Type Image}">
                                                 <Setter Property="Source" Value="/Assets/happy.png" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding GameResult}" Value="2">
+                                                    <DataTrigger Binding="{Binding State}" Value="{x:Static enums:GameState.Won}">
                                                         <Setter Property="Source" Value="/Assets/star.png" />
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding GameResult}" Value="1">
+                                                    <DataTrigger Binding="{Binding State}" Value="{x:Static enums:GameState.Lost}">
                                                         <Setter Property="Source" Value="/Assets/sad.png" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -87,5 +94,64 @@
                 </Style>
             </Button.Style>
         </Button>
+        <DockPanel
+            Grid.Row="0"
+            Width="200"
+            Height="200"
+            HorizontalAlignment="Right">
+            <StackPanel
+                Margin="12,18"
+                HorizontalAlignment="Right"
+                DockPanel.Dock="Right"
+                Orientation="Vertical">
+                <Border
+                    Width="24"
+                    Height="24"
+                    Background="#E7E7E7"
+                    BorderBrush="Gray"
+                    BorderThickness="0.5">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        Foreground="#4D4D4D">
+                        ?
+                    </TextBlock>
+                </Border>
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding UncoveredBlocksRemaining}" />
+            </StackPanel>
+            <StackPanel
+                Margin="12,18"
+                HorizontalAlignment="Right"
+                DockPanel.Dock="Right"
+                Orientation="Vertical">
+                <Image
+                    Width="24"
+                    Height="24"
+                    Source="/Assets/finish.png" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding FlagsRemaining}" />
+            </StackPanel>
+            <StackPanel
+                Margin="12,18"
+                HorizontalAlignment="Right"
+                DockPanel.Dock="Right"
+                Orientation="Vertical">
+                <Image
+                    Width="24"
+                    Height="24"
+                    Source="/Assets/clock.png" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding TimeElapsed, Converter={StaticResource TimespanStringConverter}}" />
+            </StackPanel>
+        </DockPanel>
     </Grid>
 </Window>

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Minesweeper.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Minesweeper
+namespace Minesweeper.Views
 {
     public partial class MainWindow : Window
     {
@@ -21,7 +21,7 @@ namespace Minesweeper
             CreateNewGame(_configurations[Difficulty.Normal]);
         }
 
-        private void NewGameOnClick(object sender, RoutedEventArgs e)
+        private void NewGame_OnClick(object sender, RoutedEventArgs e)
         {
             if (rbEasy.IsChecked.Value)
                 CreateNewGame(_configurations[Difficulty.Easy]);
