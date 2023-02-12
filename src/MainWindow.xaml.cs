@@ -75,10 +75,5 @@ namespace Minesweeper
             config = new GameConfig(rows, columns, bombs);
             return true;
         }
-
-        private void Validate(Func<bool> condition, string errorMessage, ref string validationResult)
-        {
-
-        }
     }
 }
