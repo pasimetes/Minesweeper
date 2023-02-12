@@ -21,7 +21,7 @@ namespace Minesweeper.Views
             _timer = new Timer();
 
             FlagsRemaining = config.Bombs;
-            UncoveredBlocksRemaining = (config.Rows * config.Columns);
+            UncoveredBlocksRemaining = (config.Rows * config.Columns) - config.Bombs;
 
             Initialize();
         }
@@ -147,9 +147,7 @@ namespace Minesweeper.Views
 
         private void OnExplode(object sender, EventArgs e)
         {
-            foreach (var block in GetAllBlocks().Where(b => b.BlockType == BlockType.Bomb))
-                block.Uncover();
-
+            UncoverAllBombs();
             EndGame(GameState.Lost);
         }
 
@@ -163,7 +161,7 @@ namespace Minesweeper.Views
 
             UncoveredBlocksRemaining--;
 
-            if (UncoveredBlocksRemaining - _config.Bombs == 0 && State == GameState.InProgress)
+            if (UncoveredBlocksRemaining == 0 && State == GameState.InProgress)
                 EndGame(GameState.Won);
         }
 
@@ -187,6 +185,17 @@ namespace Minesweeper.Views
                 case GameState.Lost:
                     MessageBox.Show("Loser");
                     break;
+            }
+        }
+
+        private void UncoverAllBombs()
+        {
+            foreach (var block in GetAllBlocks().Where(b => b.BlockType == BlockType.Bomb))
+            {
+                block.OnUncover -= OnUncover;
+                block.OnExplode -= OnExplode;
+                block.OnFlag -= OnFlag;
+                block.Uncover();
             }
         }
 

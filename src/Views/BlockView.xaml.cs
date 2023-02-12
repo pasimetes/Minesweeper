@@ -108,7 +108,7 @@ namespace Minesweeper.Views
                         neighbour.Increment();
                         break;
 
-                    default:
+                    case BlockType.None:
                         neighbour.SetAsNumber();
                         neighbour.Increment();
                         break;
