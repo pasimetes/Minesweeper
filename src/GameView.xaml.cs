@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,12 +11,12 @@ namespace Minesweeper
     {
         private readonly GameConfig _config;
         private readonly BlockView[,] _blocks;
-        private int _unexposedBlocks;
+        private int _unexposedBlocksRemaining;
         public GameView(GameConfig config)
         {
             _config = config;
             _blocks = new BlockView[config.Rows, config.Columns];
-            _unexposedBlocks = (config.Rows * config.Columns) - config.Bombs;
+            _unexposedBlocksRemaining = config.Rows * config.Columns;
 
             Initialize();
         }
@@ -22,7 +24,12 @@ namespace Minesweeper
         public static readonly DependencyProperty GameResultProperty =
             DependencyProperty.Register("GameResult", typeof(int), typeof(GameView), new PropertyMetadata());
 
-        public int GameResult
+        /// <summary>
+        /// 0 - game in progress
+        /// 1 - lost
+        /// 2 - won
+        /// </summary>
+        public int GameStatus
         {
             get => (int)GetValue(GameResultProperty);
             set => SetValue(GameResultProperty, value);
@@ -34,6 +41,13 @@ namespace Minesweeper
             AddBlocks();
             SetNeighbours();
             GenerateBombs();
+        }
+
+        public IEnumerable<BlockView> GetAllBlocks()
+        {
+            for (int i = 0; i < _config.Rows; i++)
+                for (int j = 0; j < _config.Columns; j++)
+                    yield return _blocks[i, j];
         }
 
         private void AddBlocks()
@@ -80,7 +94,7 @@ namespace Minesweeper
         private void GenerateBombs()
         {
             var generated = 0;
-            var random = new Random();
+            var random = new Random(Guid.NewGuid().GetHashCode());
             while (generated != _config.Bombs)
             {
                 var row = random.Next(0, _config.Rows);
@@ -105,17 +119,22 @@ namespace Minesweeper
 
         private void OnBombClicked(object sender, EventArgs e)
         {
-            GameResult = 1;
+            GameStatus = 1;
             IsHitTestVisible = false;
+
+            foreach (var block in GetAllBlocks().Where(b => b.IsBomb))
+                block.Expose();
+
             MessageBox.Show("Loser");
         }
 
         private void OnExposed(object sender, EventArgs e)
         {
-            Interlocked.Decrement(ref _unexposedBlocks);
-            if (_unexposedBlocks == 0)
+            Interlocked.Decrement(ref _unexposedBlocksRemaining);
+
+            if (_unexposedBlocksRemaining - _config.Bombs == 0 && GameStatus == 0)
             {
-                GameResult = 2;
+                GameStatus = 2;
                 MessageBox.Show("Winner");
             }
         }

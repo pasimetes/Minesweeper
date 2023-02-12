@@ -143,7 +143,6 @@ namespace Minesweeper
 
                     if (IsBomb)
                     {
-                        Expose();
                         OnBombClicked?.Invoke(this, EventArgs.Empty);
                         return;
                     }
