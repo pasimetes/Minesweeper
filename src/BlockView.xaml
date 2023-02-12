@@ -1,0 +1,95 @@
+﻿<UserControl
+    x:Class="Minesweeper.BlockView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Block"
+    MouseDown="OnMouseDown">
+    <Border x:Name="Border" BorderThickness="1">
+        <Border.Style>
+            <Style TargetType="{x:Type Border}">
+                <Setter Property="Background" Value="#EAEAEA" />
+                <Setter Property="BorderBrush" Value="White" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsExposed, ElementName=Block}" Value="True">
+                        <Setter Property="Background" Value="White" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding Text, ElementName=Block}">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="FontSize" Value="18" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsNumber, ElementName=Block}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsNumber, ElementName=Block}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsExposed, ElementName=Block}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="1">
+                                <Setter Property="Foreground" Value="DeepSkyBlue" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="2">
+                                <Setter Property="Foreground" Value="LimeGreen" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="3">
+                                <Setter Property="Foreground" Value="Crimson" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="4">
+                                <Setter Property="Foreground" Value="Indigo" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="5">
+                                <Setter Property="Foreground" Value="Orange" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="6">
+                                <Setter Property="Foreground" Value="SaddleBrown" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="7">
+                                <Setter Property="Foreground" Value="HotPink" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="8">
+                                <Setter Property="Foreground" Value="DarkCyan" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Image
+                Width="24"
+                Height="24"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <Image.Style>
+                    <Style TargetType="{x:Type Image}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding IsBomb, ElementName=Block}" Value="True" />
+                                    <Condition Binding="{Binding IsExposed, ElementName=Block}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <MultiDataTrigger.Setters>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Setter Property="Source" Value="/Assets/bomb.png" />
+                                </MultiDataTrigger.Setters>
+                            </MultiDataTrigger>
+                            <DataTrigger Binding="{Binding IsFlagged, ElementName=Block}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Source" Value="/Assets/finish.png" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+        </Grid>
+    </Border>
+</UserControl>

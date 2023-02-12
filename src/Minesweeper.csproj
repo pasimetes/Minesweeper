@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\bomb.png" />
+    <None Remove="Assets\finish.png" />
+    <None Remove="Assets\happy.png" />
+    <None Remove="Assets\sad.png" />
+    <None Remove="Assets\star.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\bomb.png">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\finish.png">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\happy.png" />
+    <Resource Include="Assets\sad.png" />
+    <Resource Include="Assets\star.png" />
+  </ItemGroup>
+
+</Project>
