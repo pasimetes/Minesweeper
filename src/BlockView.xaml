@@ -4,14 +4,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Name="Block"
     MouseDown="OnMouseDown">
-    <Border x:Name="Border" BorderThickness="1">
+    <Border x:Name="Border" BorderThickness="0.5">
+
         <Border.Style>
             <Style TargetType="{x:Type Border}">
-                <Setter Property="Background" Value="#EAEAEA" />
-                <Setter Property="BorderBrush" Value="White" />
+                <Setter Property="Background" Value="#E7E7E7" />
+                <Setter Property="BorderBrush" Value="Gray" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsExposed, ElementName=Block}" Value="True">
-                        <Setter Property="Background" Value="White" />
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard TargetProperty="(Border.Background).(SolidColorBrush.Color)">
+                                    <ColorAnimation
+                                        From="#E7E7E7"
+                                        To="White"
+                                        Duration="0:0:0.5" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -36,13 +46,13 @@
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="1">
-                                <Setter Property="Foreground" Value="DeepSkyBlue" />
+                                <Setter Property="Foreground" Value="SteelBlue" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="2">
                                 <Setter Property="Foreground" Value="LimeGreen" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="3">
-                                <Setter Property="Foreground" Value="Crimson" />
+                                <Setter Property="Foreground" Value="IndianRed" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Number, ElementName=Block}" Value="4">
                                 <Setter Property="Foreground" Value="Indigo" />
