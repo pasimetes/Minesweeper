@@ -26,8 +26,8 @@ namespace Minesweeper.Views
         public static readonly DependencyProperty IsFlaggedProperty =
             DependencyProperty.Register("IsFlagged", typeof(bool), typeof(CellView), new PropertyMetadata());
 
-        public static readonly DependencyProperty NumberProperty =
-            DependencyProperty.Register("Number", typeof(int), typeof(CellView), new PropertyMetadata());
+        public static readonly DependencyProperty BombsNearbyProperty =
+            DependencyProperty.Register("BombsNearby", typeof(int), typeof(CellView), new PropertyMetadata());
 
         public CellType CellType
         {
@@ -47,22 +47,22 @@ namespace Minesweeper.Views
             set => SetValue(IsFlaggedProperty, value);
         }
 
-        public int Number
+        public int BombsNearby
         {
-            get => (int)GetValue(NumberProperty);
-            set => SetValue(NumberProperty, value);
+            get => (int)GetValue(BombsNearbyProperty);
+            set => SetValue(BombsNearbyProperty, value);
         }
 
         public void SetAsBomb()
         {
             CellType = CellType.Bomb;
-            Number = 0;
+            BombsNearby = 0;
         }
 
         public void SetAsNumber()
         {
             CellType = CellType.Number;
-            Number = 0;
+            BombsNearby = 0;
         }
 
         public void Uncover()
@@ -80,7 +80,7 @@ namespace Minesweeper.Views
 
         public void Increment()
         {
-            Number++;
+            BombsNearby++;
         }
     }
 }

@@ -31,7 +31,7 @@
             <TextBlock
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding Number, ElementName=Cell}">
+                Text="{Binding BombsNearby, ElementName=Cell}">
                 <TextBlock.Style>
                     <Style TargetType="{x:Type TextBlock}">
                         <Setter Property="FontSize" Value="18" />
@@ -44,28 +44,28 @@
                             <DataTrigger Binding="{Binding IsUncovered, ElementName=Cell}" Value="False">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="1">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="1">
                                 <Setter Property="Foreground" Value="SteelBlue" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="2">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="2">
                                 <Setter Property="Foreground" Value="LimeGreen" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="3">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="3">
                                 <Setter Property="Foreground" Value="IndianRed" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="4">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="4">
                                 <Setter Property="Foreground" Value="Indigo" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="5">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="5">
                                 <Setter Property="Foreground" Value="Orange" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="6">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="6">
                                 <Setter Property="Foreground" Value="SaddleBrown" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="7">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="7">
                                 <Setter Property="Foreground" Value="HotPink" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Number, ElementName=Cell}" Value="8">
+                            <DataTrigger Binding="{Binding BombsNearby, ElementName=Cell}" Value="8">
                                 <Setter Property="Foreground" Value="DarkCyan" />
                             </DataTrigger>
                         </Style.Triggers>
