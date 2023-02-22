@@ -5,23 +5,24 @@ using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Minesweeper.Views
 {
     public partial class GameView : UserControl
     {
         private readonly GameConfig _config;
-        private readonly BlockView[,] _blocks;
+        private readonly IDictionary<CellView, ICollection<CellView>> _cellsAdjacencies;
         private readonly Timer _timer;
 
         public GameView(GameConfig config)
         {
             _config = config;
-            _blocks = new BlockView[config.Rows, config.Columns];
+            _cellsAdjacencies = new Dictionary<CellView, ICollection<CellView>>();
             _timer = new Timer();
 
             FlagsRemaining = config.Bombs;
-            UncoveredBlocksRemaining = (config.Rows * config.Columns) - config.Bombs;
+            UncoveredCellsRemaining = (config.Rows * config.Columns) - config.Bombs;
 
             Initialize();
         }
@@ -30,13 +31,13 @@ namespace Minesweeper.Views
             DependencyProperty.Register("State", typeof(GameState), typeof(GameView), new PropertyMetadata());
 
         public static readonly DependencyProperty FlagsRemainingProperty =
-           DependencyProperty.Register("FlagsRemaining", typeof(int), typeof(GameView), new PropertyMetadata());
+            DependencyProperty.Register("FlagsRemaining", typeof(int), typeof(GameView), new PropertyMetadata());
 
-        public static readonly DependencyProperty UncoveredBlocksRemainingProperty =
-          DependencyProperty.Register("UncoveredBlocksRemaining", typeof(int), typeof(GameView), new PropertyMetadata());
+        public static readonly DependencyProperty UncoveredCellsRemainingProperty =
+            DependencyProperty.Register("UncoveredCellsRemaining", typeof(int), typeof(GameView), new PropertyMetadata());
 
         public static readonly DependencyProperty TimeElapsedProperty =
-           DependencyProperty.Register("TimeElapsed", typeof(int), typeof(GameView), new PropertyMetadata());
+            DependencyProperty.Register("TimeElapsed", typeof(int), typeof(GameView), new PropertyMetadata());
 
         public GameState State
         {
@@ -50,10 +51,10 @@ namespace Minesweeper.Views
             set => SetValue(FlagsRemainingProperty, value);
         }
 
-        public int UncoveredBlocksRemaining
+        public int UncoveredCellsRemaining
         {
-            get => (int)GetValue(UncoveredBlocksRemainingProperty);
-            set => SetValue(UncoveredBlocksRemainingProperty, value);
+            get => (int)GetValue(UncoveredCellsRemainingProperty);
+            set => SetValue(UncoveredCellsRemainingProperty, value);
         }
 
         public int TimeElapsed
@@ -65,12 +66,12 @@ namespace Minesweeper.Views
         private void Initialize()
         {
             InitializeComponent();
-            AddBlocks();
+            AddCells();
             SetNeighbours();
             GenerateBombs();
         }
 
-        private void AddBlocks()
+        private void AddCells()
         {
             for (int i = 0; i < _config.Rows; i++)
             {
@@ -81,121 +82,188 @@ namespace Minesweeper.Views
                     if (i == 0)
                         GameGrid.ColumnDefinitions.Add(new ColumnDefinition());
 
-                    var block = new BlockView(i, j);
-                    block.OnExplode += OnExplode;
-                    block.OnUncover += OnUncover;
-                    block.OnFlag += OnFlag;
+                    var cell = new CellView(i, j);
+                    cell.MouseDown += Cell_MouseDown;
 
-                    _blocks[i, j] = block;
+                    _cellsAdjacencies.Add(cell, new List<CellView>());
 
-                    Grid.SetRow(block, i);
-                    Grid.SetColumn(block, j);
-                    GameGrid.Children.Add(block);
+                    Grid.SetRow(cell, i);
+                    Grid.SetColumn(cell, j);
+                    GameGrid.Children.Add(cell);
                 }
             }
         }
-        
+
         private void SetNeighbours()
         {
-            foreach (var block in _blocks)
+            foreach (var kvp in _cellsAdjacencies)
             {
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row - 1, block.Column));
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row - 1, block.Column - 1));
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row - 1, block.Column + 1));
+                var cell = kvp.Key;
+                var neighbours = kvp.Value;
 
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row, block.Column - 1));
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row, block.Column + 1));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row - 1, cell.Column));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row - 1, cell.Column - 1));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row - 1, cell.Column + 1));
 
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row + 1, block.Column));
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row + 1, block.Column - 1));
-                block.AddNeighbour(TryGetBlockByPlacement(block.Row + 1, block.Column + 1));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row, cell.Column - 1));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row, cell.Column + 1));
+
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row + 1, cell.Column));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row + 1, cell.Column - 1));
+                neighbours.Add(GetCellByPlacementOrDefault(cell.Row + 1, cell.Column + 1));
             }
+        }
+
+        public void UpdateNeighbours(CellView cell)
+        {
+            foreach (var neighbour in _cellsAdjacencies[cell].Where(n => n != null))
+                switch (neighbour.CellType)
+                {
+                    case CellType.Bomb:
+                        continue;
+
+                    case CellType.Number:
+                        neighbour.Increment();
+                        break;
+
+                    case CellType.None:
+                        neighbour.SetAsNumber();
+                        neighbour.Increment();
+                        break;
+                }
         }
 
         private void GenerateBombs()
         {
             var generated = 0;
             var random = new Random(Guid.NewGuid().GetHashCode());
+
             while (generated != _config.Bombs)
             {
                 var row = random.Next(0, _config.Rows);
                 var column = random.Next(0, _config.Columns);
+                var prefferedCell = GetCellByPlacementOrDefault(row, column);
 
-                if (_blocks[row, column].BlockType != BlockType.Bomb)
+                if (prefferedCell != null && prefferedCell.CellType != CellType.Bomb)
                 {
-                    _blocks[row, column].SetAsBomb();
-                    _blocks[row, column].UpdateNeighbours();
+                    prefferedCell.SetAsBomb();
+                    UpdateNeighbours(prefferedCell);
                     generated++;
                 }
             }
         }
 
-        private BlockView TryGetBlockByPlacement(int row, int column)
+        private void Cell_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (row < 0 || column < 0 || row >= _config.Rows || column >= _config.Columns)
-                return null;
+            var cell = (CellView)sender;
 
-            return _blocks[row, column];
+            switch (e.ChangedButton)
+            {
+                case MouseButton.Left:
+                    if (cell.IsFlagged)
+                        return;
+
+                    switch (cell.CellType)
+                    {
+                        case CellType.Bomb:
+                            State = GameState.Lost;
+                            UncoverAllCells();
+                            EndGame();
+                            return;
+
+                        case CellType.Number:
+                            UncoverCell(cell);
+                            return;
+                    }
+
+                    SpreadUncover(cell);
+                    break;
+
+                case MouseButton.Right:
+                    if (cell.IsUncovered)
+                        return;
+
+                    cell.ToggleFlag();
+                    FlagsRemaining += cell.IsFlagged ? -1 : 1;
+                    break;
+            }
         }
 
-        public IEnumerable<BlockView> GetAllBlocks()
+        private void UncoverCell(CellView cell)
         {
-            for (int i = 0; i < _config.Rows; i++)
-                for (int j = 0; j < _config.Columns; j++)
-                    yield return _blocks[i, j];
-        }
+            cell.Uncover();
 
-        private void OnExplode(object sender, EventArgs e)
-        {
-            UncoverAllBombs();
-            EndGame(GameState.Lost);
-        }
-
-        private void OnUncover(object sender, EventArgs e)
-        {
             if (State == GameState.Ready)
             {
                 State = GameState.InProgress;
                 BeginTimer();
             }
 
-            UncoveredBlocksRemaining--;
+            UncoveredCellsRemaining--;
 
-            if (UncoveredBlocksRemaining == 0 && State == GameState.InProgress)
-                EndGame(GameState.Won);
+            CheckForWin();
         }
 
-        private void OnFlag(object sender, bool e)
+        private void UncoverAllCells()
         {
-            FlagsRemaining += e ? -1 : 1;
+            foreach (var cell in GetAllCells())
+            {
+                UncoverCell(cell);
+            }
         }
 
-        private void EndGame(GameState state)
+        public void SpreadUncover(CellView cell)
+        {
+            if (cell == null || cell.IsFlagged || cell.IsUncovered || cell.CellType == CellType.Bomb)
+                return;
+
+            UncoverCell(cell);
+
+            if (cell.CellType == CellType.Number)
+                return;
+
+            foreach (var neighbour in _cellsAdjacencies[cell])
+                SpreadUncover(neighbour);
+        }
+
+        private IEnumerable<CellView> GetAllCells()
+        {
+            return _cellsAdjacencies.Keys;
+        }
+
+        private CellView GetCellByPlacementOrDefault(int row, int column)
+        {
+            if (row < 0 || column < 0 || row >= _config.Rows || column >= _config.Columns)
+                return null;
+
+            return _cellsAdjacencies.Keys.SingleOrDefault(b => b.Row == row && b.Column == column);
+        }
+
+        private void CheckForWin()
+        {
+            if (UncoveredCellsRemaining == 0 && State == GameState.InProgress)
+            {
+                State = GameState.Won;
+                UncoverAllCells();
+                EndGame();
+            }
+        }
+
+        private void EndGame()
         {
             StopTimer();
 
-            State = state;
             IsHitTestVisible = false;
 
-            switch (state)
+            switch (State)
             {
                 case GameState.Won:
                     MessageBox.Show("Winner");
                     break;
+
                 case GameState.Lost:
                     MessageBox.Show("Loser");
                     break;
-            }
-        }
-
-        private void UncoverAllBombs()
-        {
-            foreach (var block in GetAllBlocks().Where(b => b.BlockType == BlockType.Bomb))
-            {
-                block.OnUncover -= OnUncover;
-                block.OnExplode -= OnExplode;
-                block.OnFlag -= OnFlag;
-                block.Uncover();
             }
         }
 

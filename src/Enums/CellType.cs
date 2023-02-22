@@ -1,6 +1,6 @@
 ﻿namespace Minesweeper.Enums
 {
-    public enum BlockType
+    public enum CellType
     {
         None,
         Number,

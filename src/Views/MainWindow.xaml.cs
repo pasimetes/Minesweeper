@@ -44,8 +44,6 @@ namespace Minesweeper.Views
 
             var game = new GameView(config);
 
-            Grid.SetRow(game, 1);
-
             DataContext = game;
             MainGrid.Children.Add(game);
         }
